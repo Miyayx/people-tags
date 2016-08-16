@@ -116,7 +116,7 @@ def information_gain(X, y):
         for c in classCnt:
             probs = classCnt[c] / float(featureTot)
             entropy_x_set = entropy_x_set - probs * np.log(probs)
-            probs = (classTotCnt[c] - classCnt[c]) / float(tot - featureTot)
+            probs = (classTotCnt[c] - classCnt[c]) / (float(tot - featureTot) + 0.0001)
             entropy_x_not_set = entropy_x_not_set - probs * np.log(probs)
         for c in classTotCnt:
             if c not in classCnt:

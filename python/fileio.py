@@ -7,7 +7,7 @@ import numpy as np
 def read_matrix(fn, feature_col=3, times = 1, frequency=True, norm=True, _class=True, class_col=1, class_type='gender'):
     feature_count = {}
     for line in open(fn):
-        f = line.split('\t')[feature_col]
+        f = line.strip('\n').split('\t')[feature_col]
         feature_count[f] = feature_count.get(f, 0) + 1
     #feature_list = [f for f in feature_count if feature_count[f] >= 1 ]
     feature_list = [f for f in feature_count if feature_count[f] >= times ]

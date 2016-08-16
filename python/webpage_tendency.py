@@ -42,8 +42,8 @@ def DG(prob_m, prob_f):
     return dg
 
 def get_words(urls, fn, id_col=0, content_col=1, seperator='\t'):
-    import pynlpir
-    pynlpir.open()
+    #import pynlpir
+    #pynlpir.open()
 
     url_set = set(urls)
     url_words = {}
@@ -53,7 +53,7 @@ def get_words(urls, fn, id_col=0, content_col=1, seperator='\t'):
     for line in open(fn):
         items = line.strip('\n').split(seperator)
         url, text = items[id_col], items[content_col]
-        if not url in urls:
+        if not url in url_set:
             continue
         if url in url_words:
             continue
@@ -65,6 +65,9 @@ def get_words(urls, fn, id_col=0, content_col=1, seperator='\t'):
 
     doc_words = []
     for url in urls:
+        if not url in url_words:
+            print url
+            continue
         doc_words.append(url_words[url])
         #doc_words += [  " ".join([ i for i in pynlpir.get_key_words(text) if not i.isdigit() and not i in stop_words ]) ]
     return doc_words
