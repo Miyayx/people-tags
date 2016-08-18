@@ -16,6 +16,6 @@ if __name__=='__main__':
         for k in keys:
             keywords_count[k] = keywords_count.get(k, 0) + 1
 
-    keywords = [k for k, v in keywords_count.iteritems() if v > 10]
+    keywords = [k for k, v in keywords_count.items() if v > 10]
 
 

@@ -2,10 +2,6 @@
 
 import numpy as np
 import sklearn.feature_extraction
-import sklearn.naive_bayes as nb
-import sklearn.externals.joblib as jl
-from sklearn import cross_validation
-from sklearn.linear_model import LogisticRegression
 import sys
 import copy
 import jieba
@@ -39,7 +35,7 @@ def word():
     X = fh.fit_transform(kvlist)
 
 def merge_similar_brand(id_matrix, features):
-    print "Features:", len(features)
+    print("Features:"%len(features))
 
     feature_index = dict((k, i) for i, k in enumerate(features))
 
@@ -71,13 +67,13 @@ def merge_similar_brand(id_matrix, features):
 
     featureN = len(set(feature_index.values()))
     vector = [0] * featureN
-    for f, i in feature_index.iteritems():
+    for f, i in feature_index.items():
         if i < featureN:
             vector[i] = 1
 
-    print "vector:",vector.count(0)
+    print("vector: %d"%vector.count(0))
     j = vector.index(0)
-    for f, i in copy.copy(feature_index).iteritems():
+    for f, i in copy.copy(feature_index).items():
         if i >= featureN:
             vector[j] = 1
             feature_index[f] = j
@@ -85,7 +81,7 @@ def merge_similar_brand(id_matrix, features):
                 if vector[k] == 0:
                     j = k
                     break
-    print "vector:",vector.count(0)
+    print("vector:%d"%vector.count(0))
 
     return feature_index
 
@@ -93,10 +89,10 @@ def convert_matrix(id_matrix, features, feature_index, frequency=True):
     new_matrix = {}
 
     featureN = len(set(feature_index.values()))
-    print "Old feature Count", len(features)
-    print "New feature Count", featureN
+    print("Old feature Count %d"%len(features))
+    print("New feature Count%d"%featureN)
 
-    for _id, matrix in id_matrix.iteritems():
+    for _id, matrix in id_matrix.items():
         vector = [0] * featureN
         for i, feature in enumerate(features):
             if frequency:
@@ -142,7 +138,7 @@ def information_gain(X, y):
     classCnt = {}
     featureTot = 0
     information_gain = []
-    print "\n" ,len(y)
+    print("\n %d"%len(y))
     for i in range(0, len(nz[0])):
         if (i != 0 and nz[0][i] != pre):
             for notappear in range(pre+1, nz[0][i]):

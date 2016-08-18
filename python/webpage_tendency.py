@@ -24,12 +24,12 @@ def model(trainX, trainY, testX):
         if len(label_index) >= labelN:
             break
         m = np.argmax(predict_proba[i])
-        print predict_proba[i]
+        print(predict_proba[i])
         label_index[predict[i]] = m
 
-    print '\nlabel index:'
-    for l, i in label_index.iteritems():
-        print l,i
+    print('\nlabel index:')
+    for l, i in label_index.items():
+        print(str(l) + " "+ str(i))
 
     with open('tmp', 'w') as f:
         for ps in predict_proba:
@@ -66,7 +66,7 @@ def get_words(urls, fn, id_col=0, content_col=1, seperator='\t'):
     doc_words = []
     for url in urls:
         if not url in url_words:
-            print url
+            print(url)
             continue
         doc_words.append(url_words[url])
         #doc_words += [  " ".join([ i for i in pynlpir.get_key_words(text) if not i.isdigit() and not i in stop_words ]) ]
@@ -82,7 +82,7 @@ def content_feature(doc_words, featureN=1000 ):
     X = fe.fit_transform(doc_words)
     keywords = fe.get_feature_names()
     for k in keywords[:20]:
-        print "keywords",k
+        print("keywords %s"%str(k))
     return X, keywords
 
 def select_feature_by_ig(doc_words, labels, featureN=8000):
@@ -90,6 +90,7 @@ def select_feature_by_ig(doc_words, labels, featureN=8000):
     用information gain
     """
 
+    print("select feature by ig")
     keywords = []
     for words in doc_words:
         if type(words) == str:
@@ -125,7 +126,8 @@ def select_feature_by_ig(doc_words, labels, featureN=8000):
 
     return features
 
-def generateX(features, doc_words):
+def generateX(features, doc_words):  
+    print("generate X")
     feature_index = dict((k, i) for i, k in enumerate(features))
     X = np.zeros((len(doc_words), len(features)))
     for i in range(len(doc_words)):
@@ -147,7 +149,7 @@ def demographic_predict(id_url_matrix, url_tend_matrix):
         #id_predict.append(1 if c_predict[1] > 0.4 else np.argmax(c_predict))
         id_predict.append(np.argmax(c_predict))
 
-    print "\nPredict Distribution:", Counter(id_predict)
+    print("\nPredict Distribution: %s"%str(Counter(id_predict)))
 
     with open('predict_result', 'w') as f:
         for ps in id_predict_proba:
@@ -162,11 +164,11 @@ if __name__ == '__main__':
 
     id_matrix, urls, id_class = read_matrix('../data/xinjiang_profile_wx_balance.dat', feature_col=3, times=30, frequency=True, norm=False, _class=True, class_col=2, class_type='age' )
     #id_matrix, urls, id_class = read_matrix('../data/xj_phone_gender_product_balance.dat', feature_col=-3, frequency=True, norm=False )
-    print "Urls:",len(urls)
+    print("Urls: %d"%len(urls))
 
-    print "Actual Distribution:"
+    print("Actual Distribution:")
     for k, v in Counter(id_class.values()).items():
-        print k,v
+        print(k+" "+v)
 
     matrix, labels = convert_matrix(id_matrix, id_class)
     matrix = np.array(matrix)
@@ -186,7 +188,7 @@ if __name__ == '__main__':
 
     f_web_tend_examples = open('web_tend_examples', 'w')
 
-    for c, array in w_c.iteritems():
+    for c, array in w_c.items():
         for i, prob in enumerate(w_c[c] * 1.0 / w_sum):
             if prob > 0.75:
                 f_web_tend_examples.write("%s\t%s\n"%(c, urls[i]))
@@ -195,10 +197,10 @@ if __name__ == '__main__':
 
     f_web_tend_examples.close()
 
-    print 'train num:', len(train_urls)
-    print 'train stat:'
+    print('train num: %d'%len(train_urls))
+    print('train stat:')
     for k, v in Counter(trainY).items():
-        print k,v
+        print(k+" "+v)
     #DGs = []
     #for p1, p2 in zip(w_c.values()[0], w_c.values()[1]):
     #    DGs.append(DG(p1, p2))
@@ -219,15 +221,15 @@ if __name__ == '__main__':
 
     correct = 0
     
-    print "Predict Number:", len(predict)
-    print "Total Number:", len(labels)
+    print("Predict Number: %d"%len(predict))
+    print("Total Number: %d"%len(labels))
     for i in range(len(predict)):
         if not labels[i] in label_index:
             continue
         if label_index[labels[i]] == predict[i]:
             correct += 1
-    print "Accuracy = %f"%(correct*1.0/len(labels))
+    print("Accuracy = %f"%(correct*1.0/len(labels)))
     
 
-    print 'Time Consuming:', time.time() - start_time
+    print('Time Consuming: %f'%(time.time() - start_time))
 

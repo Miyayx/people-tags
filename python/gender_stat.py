@@ -18,12 +18,12 @@ def class_first_catalog(fn):
             d_class[clazz] = {}
         d_class[clazz][fc] = d_class[clazz].get(fc, 0) + 1
 
-    for cata, clazz_d in d_catalog.iteritems():
+    for cata, clazz_d in d_catalog.items():
         print cata, clazz_d
-    for clazz, cata_d in d_class.iteritems():
+    for clazz, cata_d in d_class.items():
         print clazz
         Sum = sum(cata_d.values())
-        for cata, count in sorted(cata_d.iteritems(), key=lambda x:x[1], reverse=True):
+        for cata, count in sorted(cata_d.items(), key=lambda x:x[1], reverse=True):
             print cata, count, count*1.0/Sum
 
 #平均点击次数
@@ -38,7 +38,7 @@ def class_click_number(fn):
             tmp_id = _id
         class_click[clazz] = class_click.get(clazz, 0) + 1
 
-    for clazz, click in class_click.iteritems():
+    for clazz, click in class_click.items():
         print clazz, click*1.0/class_count[clazz]
 
 #物品个数
@@ -56,10 +56,10 @@ def class_page_number(fn):
             class_iddate_page[clazz][k] = set()
 
         class_iddate_page[clazz][k].add(page_string)
-    #for clazz, iddate_page in class_iddate_page.iteritems():
-    #    for iddate, page in sorted(iddate_page.iteritems(), key=lambda x:len(x[1]), reverse=True):
+    #for clazz, iddate_page in class_iddate_page.items():
+    #    for iddate, page in sorted(iddate_page.items(), key=lambda x:len(x[1]), reverse=True):
     #        print clazz, iddate, len(page)
-    for clazz, iddate_page in class_iddate_page.iteritems():
+    for clazz, iddate_page in class_iddate_page.items():
         print clazz, sum([len(pages) for pages in iddate_page.values()]) *1.0/len(iddate_page)
 
 def class_keyword(fn):
@@ -80,8 +80,8 @@ def class_keyword(fn):
             if k in product or k in first or k in second or k in third:
                 class_keyword_count[clazz][k] = class_keyword_count[clazz].get(k, 0) + 1
 
-    for clazz, keyword_count in class_keyword_count.iteritems():
-        for key, c in keyword_count.iteritems():
+    for clazz, keyword_count in class_keyword_count.items():
+        for key, c in keyword_count.items():
             print clazz, key, c
 
 #一次购物行为的停留时长
@@ -97,10 +97,10 @@ def class_duration(fn):
             class_id_datetime[clazz][_id] = set()
         class_id_datetime[clazz][_id].add(datetime)
 
-    for clazz, id_datetime in class_id_datetime.iteritems():
+    for clazz, id_datetime in class_id_datetime.items():
         s_duration = 0
         s_count = 0
-        for _id, datetimes in id_datetime.iteritems():
+        for _id, datetimes in id_datetime.items():
             #datetimes = [long(d)/100 for d in datetimes]
             datetimes = [long(d) for d in datetimes]
             datetimes.sort()

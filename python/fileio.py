@@ -14,7 +14,7 @@ def read_matrix(fn, feature_col=3, times = 1, frequency=True, norm=True, _class=
     #feature_list = list(set([line.split('\t')[feature_col].strip() for line in codecs.open(fn, 'r', 'utf-8')]))
     if '-1' in feature_list:
         feature_list.remove('-1')
-    print "Feature Number:",len(feature_list)
+    print("Feature Number: %d"%len(feature_list))
     feature_index = dict((k, i) for i, k in enumerate(feature_list))
 
     id_matrix = {}
@@ -53,8 +53,8 @@ def read_matrix(fn, feature_col=3, times = 1, frequency=True, norm=True, _class=
                         id_class[_id] = '45~55'
                     else:
                         id_class[_id] = '>=55'
-                except Exception,e:
-                    print e
+                except Exception as e:
+                    print(e)
                     continue
 
         if not _id in id_matrix:
@@ -66,8 +66,7 @@ def read_matrix(fn, feature_col=3, times = 1, frequency=True, norm=True, _class=
             id_matrix[_id][feature_index[feature]] = 1
 
     if norm:
-        print 'norm'
-        for _id, matrix in id_matrix.iteritems():
+        for _id, matrix in id_matrix.items():
             s = sum(matrix)
             id_matrix[_id] = [1.0*i/s for i in matrix]
 
@@ -80,13 +79,13 @@ def write_matrix(output, id_matrix, id_class, boolean=True, features=[], class_t
 
     featureN = len(id_matrix.values()[0])
 
-    print "Writing to", output
+    print("Writing to%s"%output)
     fw = open(output, 'w')
     if features:
         fw.write(','.join(features)+',Class\n')
     else:
         fw.write(','.join(['A'+str(i) for i in range(featureN)])+',Class\n')
-    for _id, features in id_matrix.iteritems():
+    for _id, features in id_matrix.items():
         if boolean:
             features = ["no" if f == 0 else "yes" for f in features ]
         fw.write(','.join([str(f) for f in features]))
@@ -101,7 +100,7 @@ def write_matrix(output, id_matrix, id_class, boolean=True, features=[], class_t
     fw.close()
 
 def read_csv_matrix(fn, header=True, filter_features=[]):
-    print 'Reading ',fn
+    print('Reading %s'%fn)
     delimiter = ','
     #from numpy import genfromtxt
     #data = genfromtxt(fn, delimiter=delimiter)
@@ -134,7 +133,7 @@ if __name__=='__main__':
     start_time = time.time()
 
     id_matrix, features, id_class = read_matrix("../data/xj_gender_product_8000.dat", 6, frequency=False, norm=False, _class=True, class_col=2, class_type='age', times=1 )
-    print "Samples:",len(id_matrix)
+    print("Samples:%d"%len(id_matrix))
 
     output = '../data/xj_matrix_age_brand_8000.csv'
     write_matrix(output, id_matrix, id_class, class_type="age")
@@ -143,5 +142,5 @@ if __name__=='__main__':
         for i, feature in enumerate(features):
             f.write(("%d\t%s\n"%(i, feature)))
 
-    print "Time Consuming:", time.time()-start_time
+    print("Time Consuming:%f"%(time.time()-start_time))
 

@@ -59,7 +59,7 @@ def generate_matrix(fn):
             pass
             id_features[_id][3] += 1
 
-    for _id, datetimes in id_datetime.iteritems():
+    for _id, datetimes in id_datetime.items():
         s_duration = 0
         s_count = 0
 
@@ -89,13 +89,13 @@ def generate_matrix(fn):
         #id_avgduration[_id] = s_duration * 1.0/s_count
         id_features[_id][4] = s_duration * 1.0/s_count
 
-    for _id, pagestrings in id_pagestring.iteritems():
+    for _id, pagestrings in id_pagestring.items():
         id_features[_id][0] = len(pagestrings) * 1.0/s_count
         id_features[_id][1] = len(set(pagestrings)) * 1.0/s_count
         pass
 
-    matrix = [v for k, v in sorted(id_features.iteritems(), key=lambda x:x[0])]
-    labels = [v for k, v in sorted(id_class.iteritems(), key=lambda x:x[0])]
+    matrix = [v for k, v in sorted(id_features.items(), key=lambda x:x[0])]
+    labels = [v for k, v in sorted(id_class.items(), key=lambda x:x[0])]
     for m in matrix[:10]:
         print m
     return matrix, labels

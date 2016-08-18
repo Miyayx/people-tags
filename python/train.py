@@ -17,9 +17,9 @@ def train2():
     classifier = LogisticRegression()
 
     scores = cross_validation.cross_val_score(classifier, X, targetlist, cv=5)
-    print "Matrix N:",N_Features
-    print classifier
-    print scores
+    print("Matrix N: %d"%N_Features)
+    print(classifier)
+    print(scores)
     targetlist = []
     kvlist = []
 
@@ -31,8 +31,6 @@ def train(X, labels, models = []):
 
     # Create classifiers
     lr = LogisticRegression(C=1.0, class_weight='balanced', max_iter=1000, n_jobs=-1)
-    lr2 = LogisticRegression(C=1.0, class_weight='balanced', max_iter=1000, n_jobs=-1)
-    lr3 = LogisticRegression(C=1.0, class_weight='balanced', max_iter=1000, n_jobs=-1)
     gnb = GaussianNB()
     bnb = BernoulliNB()
     mnb = MultinomialNB()
@@ -47,19 +45,20 @@ def train(X, labels, models = []):
     for mi in models:
         classifier, name = classifiers[mi]
     
-        print str(classifier)
+        print(classifier)
 
         scores = cross_validation.cross_val_score(classifier, X, labels, cv=5)
         #classifier.fit(matrix, labels)
         #prediction =  classifier.predict(matrix)
             
         #print "Presicion:", classifier.score(matrix, labels)
-        print scores
+        print(scores)
+        print("Avg: %f"%(sum(scores)/len(scores)))
     #return classifier
 
 def convert_matrix(id_matrix, id_class):
-    matrix = [v for k, v in sorted(id_matrix.iteritems(), key=lambda x:x[0])]
-    labels = [v for k, v in sorted(id_class.iteritems(), key=lambda x:x[0])]
+    matrix = [v for k, v in sorted(id_matrix.items(), key=lambda x:x[0])]
+    labels = [v for k, v in sorted(id_class.items(), key=lambda x:x[0])]
     return matrix, labels
 
 def decomposition(X, n=100):
@@ -67,10 +66,8 @@ def decomposition(X, n=100):
     return pca.fit_transform(X)
 
 def feature_selection(X, y):
-    print np.array(X).shape
     lsvc = LinearSVC(C=0.01, penalty="l1", dual=False).fit(X, y)
     model = SelectFromModel(lsvc, prefit=True)
     X = model.transform(X)
-    print X.shape
     return X
 
