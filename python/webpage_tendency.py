@@ -13,7 +13,9 @@ import sys
 from collections import Counter
 
 def model(trainX, trainY, testX):
-    clf = SVC(C=1.0, probability=True)
+    print("model")
+    #clf = SVC(C=1.0, probability=True)
+    clf = LogisticRegression(C=1.0)
     clf.fit(trainX, trainY) 
     predict = clf.predict(testX)
     predict_proba = clf.predict_proba(testX)
@@ -46,6 +48,7 @@ def get_words(urls, fn, id_col=0, content_col=1, seperator='\t'):
     #pynlpir.open()
 
     url_set = set(urls)
+    print("Get words, %d articles"%(len(url_set)))
     url_words = {}
     stop_words = set([ line.strip('\n') for line in open('stop_words.txt')])
 
@@ -62,11 +65,12 @@ def get_words(urls, fn, id_col=0, content_col=1, seperator='\t'):
         c+=1
         sys.stdout.write('\r' + repr(c) + ' rows has been read ')
         sys.stdout.flush()
+    print("\n")
 
     doc_words = []
     for url in urls:
         if not url in url_words:
-            print(url)
+            #print url
             continue
         doc_words.append(url_words[url])
         #doc_words += [  " ".join([ i for i in pynlpir.get_key_words(text) if not i.isdigit() and not i in stop_words ]) ]
@@ -99,6 +103,7 @@ def select_feature_by_ig(doc_words, labels, featureN=8000):
         else:
             keywords += words
     keywords = list(set(keywords))
+    print("keywords num:%d"%len(keywords))
     #fw = open('jd_keywords.dat', 'w')
     #for w in keywords:
     #    fw.write(("%s\n"%(w)).encode('utf-8'))
@@ -126,8 +131,8 @@ def select_feature_by_ig(doc_words, labels, featureN=8000):
 
     return features
 
-def generateX(features, doc_words):  
-    print("generate X")
+def generateX(features, doc_words, norm=False):
+    print("generateX")
     feature_index = dict((k, i) for i, k in enumerate(features))
     X = np.zeros((len(doc_words), len(features)))
     for i in range(len(doc_words)):
@@ -135,6 +140,11 @@ def generateX(features, doc_words):
             if w in feature_index:
                 index = feature_index[w]
                 X[i][index] += 1
+        sys.stdout.write('\r' + repr(i) + ' has been generated ')
+        sys.stdout.flush()
+    print("\n")
+    if norm:
+        X = sklearn.preprocessing.normalize(X)
     return X
 
 def demographic_predict(id_url_matrix, url_tend_matrix):
@@ -147,7 +157,11 @@ def demographic_predict(id_url_matrix, url_tend_matrix):
                 c_predict *= url_tend_matrix[i]
         id_predict_proba.append(c_predict)
         #id_predict.append(1 if c_predict[1] > 0.4 else np.argmax(c_predict))
-        id_predict.append(np.argmax(c_predict))
+        maxi = np.argmax(c_predict)
+        if c_predict[maxi] > 0.0:
+            id_predict.append(maxi)
+        else:
+            id_predict.append(None)
 
     print("\nPredict Distribution: %s"%str(Counter(id_predict)))
 
@@ -157,13 +171,26 @@ def demographic_predict(id_url_matrix, url_tend_matrix):
 
     return id_predict
 
+def smooth(X):
+    X[X < 0.00001] = 0.1
+    return X
+
+def norm(X):
+    return X/X.sum(axis=1)[:,None]
+
+def get_separate_R(R):
+    from sklearn.utils.extmath import randomized_svd
+    U, Sigma, VT = randomized_svd(X, n_components=30, n_iter=5, random_state=None)
+    return U*np.sqrt(Sigma), VT*np.sqrt(Sigma)
+
 if __name__ == '__main__':
     import time
 
     start_time = time.time()
 
-    id_matrix, urls, id_class = read_matrix('../data/xinjiang_profile_wx_balance.dat', feature_col=3, times=30, frequency=True, norm=False, _class=True, class_col=2, class_type='age' )
-    #id_matrix, urls, id_class = read_matrix('../data/xj_phone_gender_product_balance.dat', feature_col=-3, frequency=True, norm=False )
+    #id_matrix, urls, id_class = read_matrix('../data/xinjiang_profile_wx_balance.dat', feature_col=3, times=10, frequency=True, norm=False)
+    #id_matrix, urls, id_class = read_matrix('../data/xj_gender_product_balance.dat', feature_col=8, frequency=True, norm=False, times=2)
+    id_matrix, urls, id_class = read_matrix('../data/xj_phone_gender_product_balance.dat', feature_col=7, frequency=True, norm=False, times=2)
     print("Urls: %d"%len(urls))
 
     print("Actual Distribution:")
@@ -172,13 +199,14 @@ if __name__ == '__main__':
 
     matrix, labels = convert_matrix(id_matrix, id_class)
     matrix = np.array(matrix)
-    w_sum = matrix.sum(axis=0)
 
-    w_c = {}
+
+    w_sum = matrix.sum(axis=0) #每个页面被点击的总次数
+
+    w_c = {} #每个页面的点击数在类别上的分布
     for c in set(labels):
         w_c[c] = np.array([0] * len(w_sum))
 
-    url_tendency = {}
     for i, c in enumerate(labels):
         for j in range(len(urls)):
             w_c[c][j] += matrix[i][j]
@@ -206,18 +234,42 @@ if __name__ == '__main__':
     #    DGs.append(DG(p1, p2))
     #print sorted(DGs, reverse=True)[:10]
 
-    train_doc_words = get_words(train_urls, './wx_result.dat', id_col=-1, content_col=1, seperator='\0')
-    #train_doc_words = get_words(train_urls, '../data/xj_phone_gender_product_balance.dat', id_col=-3, content_col=6)
-    features = select_feature_by_ig(train_doc_words, trainY, featureN=10000)
-    trainX = generateX(features, train_doc_words)
+    ####  content features
+    ## 用文本内容
+    #train_doc_words1 = get_words(train_urls, './wx_result.dat', id_col=-1, content_col=1, seperator='\0')
+    ## 用标题
+    #train_doc_words1 = get_words(train_urls, '../data/xinjiang_profile_wx_balance.dat', id_col=3, content_col=8, seperator='\t')
+    #train_doc_words1 = get_words(train_urls, '../data/xj_gender_product_balance.dat', id_col=8, content_col=7, seperator='\t')
+    train_doc_words1 = get_words(train_urls, '../data/xj_phone_gender_product_balance.dat', id_col=7, content_col=6, seperator='\t')
+    features1 = select_feature_by_ig(train_doc_words1, trainY, featureN=5000)
+    trainX1 = generateX(features1, train_doc_words1)
 
-    all_doc_words = get_words(urls, './wx_result.dat', id_col=-1, content_col=1, seperator='\0')
-    #all_doc_words = get_words(urls, '../data/xj_phone_gender_product_balance.dat', id_col=-3, content_col=6)
-    allX = generateX(features, all_doc_words)
+    #### category features
+    #train_doc_words2 = get_words(train_urls, '../data/xinjiang_profile_wx_balance.dat', id_col=3, content_col=7, seperator='\t')
+    train_doc_words2 = get_words(train_urls, '../data/xj_phone_gender_product_balance.dat', id_col=7, content_col=5, seperator='\t')
+    features2 = select_feature_by_ig(train_doc_words2, trainY, featureN=3000)
+    trainX2 = generateX(features2, train_doc_words2)
+
+    trainX = np.concatenate((trainX1,trainX2),axis=1)
+    #trainX = trainX1
+
+    #train(trainX, trainY)
+
+    #all_doc_words1 = get_words(urls, './wx_result.dat', id_col=-1, content_col=1, seperator='\0')
+    #all_doc_words1 = get_words(urls, '../data/xj_gender_product_balance.dat', id_col=8, content_col=7, seperator='\t')
+    all_doc_words1 = get_words(urls, '../data/xj_phone_gender_product_balance.dat', id_col=7, content_col=6, seperator='\t')
+    allX1 = generateX(features1, all_doc_words1)
+    #allX = allX1
+    #all_doc_words2 = get_words(urls, '../data/xinjiang_profile_wx_balance.dat', id_col=3, content_col=7, seperator='\t')
+    all_doc_words2 = get_words(urls, '../data/xj_phone_gender_product_balance.dat', id_col=7, content_col=5, seperator='\t')
+    allX2 = generateX(features2, all_doc_words2)
+    allX = np.concatenate((allX1,allX2),axis=1)
     #testX, test_keywords = content_feature(urls, '/Users/Miyayx/Documents/workspace/pageparser-weixin/wx_result.dat')
-    url_tend_matrix, label_index = model(trainX, trainY, allX)
+
+    url_tend_matrix, label_index = model(trainX, trainY, allX) #计算所有url的类别趋势
 
     predict = demographic_predict(matrix, url_tend_matrix)
+    predict = [ p for p in predict if p != None]
 
     correct = 0
     
@@ -226,9 +278,11 @@ if __name__ == '__main__':
     for i in range(len(predict)):
         if not labels[i] in label_index:
             continue
+        if predict[i] == None:
+            continue
         if label_index[labels[i]] == predict[i]:
             correct += 1
-    print("Accuracy = %f"%(correct*1.0/len(labels)))
+    print("Accuracy = %f"%(correct*1.0/len(predict)))
     
 
     print('Time Consuming: %f'%(time.time() - start_time))

@@ -6,14 +6,16 @@ from train import *
 from webpage_tendency import *
 
 def main1():
-    id_matrix, origin_features, id_class = read_matrix('../data/xj_gender_product_balance.dat', feature_col=6, times=2, frequency=False, norm=False, _class=True, class_col=2, class_type='age' )
+    #id_matrix, origin_features, id_class = read_matrix('../data/xj_gender_product_balance.dat', feature_col=6, times=2, frequency=False, norm=False, _class=True, class_col=2, class_type='age' )
+    id_matrix, origin_features, id_class = read_matrix('../data/xj_gender_product_balance.dat', feature_col=6, times=2, frequency=False, norm=False, class_col=2, class_type='age', balance=True)
     matrix, labels = convert_matrix(id_matrix, id_class)
+    print Counter(labels)
 
     words_matrix = []
     for vector in matrix:
         words_matrix.append([origin_features[i] for i in range(len(vector)) if vector[i] > 0 ])
     
-    featureNs = [7000, 8000, 9000, 10000, 11000, 12000]
+    featureNs = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000]
     # age 7000
     # gender 10700?
     #featureNs = [10500, 10600, 10700, 10800, 10900, 11000, 11100, 11200, 11300, 11400, 11500]
@@ -101,7 +103,9 @@ if __name__ == '__main__':
 
     start_time = time.time()
 
-    main3()
+    #main3()
+    #main2()
+    main1()
 
     print('Time Consuming: %f'%(time.time() - start_time))
     

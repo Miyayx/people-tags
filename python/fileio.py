@@ -4,7 +4,7 @@ import codecs
 import copy
 import numpy as np
 
-def read_matrix(fn, feature_col=3, times = 1, frequency=True, norm=True, _class=True, class_col=1, class_type='gender'):
+def read_matrix(fn, feature_col=3, times = 1, frequency=True, norm=True, balance=False, _class=True, class_col=1, class_type='gender'):
     feature_count = {}
     for line in open(fn):
         f = line.strip('\n').split('\t')[feature_col]
@@ -42,6 +42,7 @@ def read_matrix(fn, feature_col=3, times = 1, frequency=True, norm=True, _class=
                 try:
                     clazz = int(float(clazz))
                     if clazz < 18:
+                        continue
                         id_class[_id] = '<18'
                     elif clazz >= 18 and clazz < 25:
                         id_class[_id] = '18~24'
@@ -69,6 +70,22 @@ def read_matrix(fn, feature_col=3, times = 1, frequency=True, norm=True, _class=
         for _id, matrix in id_matrix.items():
             s = sum(matrix)
             id_matrix[_id] = [1.0*i/s for i in matrix]
+
+    #如果要数据平衡
+    if balance:
+        from collections import Counter
+        counter = Counter(id_class.values())
+        #Min = min(counter.values())
+        Min = 5000
+        class_count = dict((k, 0) for k in counter)
+        ids = []
+        for i, c in id_class.items():
+            if class_count[c] > Min:
+                continue
+            ids.append(i)
+            class_count[c] += 1
+        id_matrix = {i:id_matrix[i] for i in ids}
+        id_class = {i:id_class[i] for i in ids}
 
     if _class:
         return id_matrix, feature_list, id_class
