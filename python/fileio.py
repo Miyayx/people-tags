@@ -84,8 +84,8 @@ def read_matrix(fn, feature_col=3, times = 1, frequency=True, norm=True, balance
                 continue
             ids.append(i)
             class_count[c] += 1
-        id_matrix = {i:id_matrix[i] for i in ids}
-        id_class = {i:id_class[i] for i in ids}
+        id_matrix = dict((i,id_matrix[i]) for i in ids)
+        id_class = dict((i,id_class[i]) for i in ids)
 
     if _class:
         return id_matrix, feature_list, id_class

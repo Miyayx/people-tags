@@ -189,13 +189,13 @@ if __name__ == '__main__':
     start_time = time.time()
 
     #id_matrix, urls, id_class = read_matrix('../data/xinjiang_profile_wx_balance.dat', feature_col=3, times=10, frequency=True, norm=False)
-    #id_matrix, urls, id_class = read_matrix('../data/xj_gender_product_balance.dat', feature_col=8, frequency=True, norm=False, times=2)
-    id_matrix, urls, id_class = read_matrix('../data/xj_phone_gender_product_balance.dat', feature_col=7, frequency=True, norm=False, times=2)
+    id_matrix, urls, id_class = read_matrix('../data/xj_gender_product_balance.dat', feature_col=8, frequency=True, norm=False, times=2)
+    #id_matrix, urls, id_class = read_matrix('../data/xj_phone_gender_product_balance.dat', feature_col=7, frequency=True, norm=False, times=2)
     print("Urls: %d"%len(urls))
 
     print("Actual Distribution:")
     for k, v in Counter(id_class.values()).items():
-        print(k+" "+v)
+        print(str(k)+" "+str(v))
 
     matrix, labels = convert_matrix(id_matrix, id_class)
     matrix = np.array(matrix)
@@ -214,21 +214,21 @@ if __name__ == '__main__':
     train_urls = []
     trainY = []
 
-    f_web_tend_examples = open('web_tend_examples', 'w')
+    #f_web_tend_examples = open('web_tend_examples', 'w')
 
     for c, array in w_c.items():
         for i, prob in enumerate(w_c[c] * 1.0 / w_sum):
             if prob > 0.75:
-                f_web_tend_examples.write("%s\t%s\n"%(c, urls[i]))
+                #f_web_tend_examples.write("%s\t%s\n"%(c, urls[i]))
                 train_urls.append(urls[i])
                 trainY.append(c)
 
-    f_web_tend_examples.close()
+    #f_web_tend_examples.close()
 
     print('train num: %d'%len(train_urls))
     print('train stat:')
     for k, v in Counter(trainY).items():
-        print(k+" "+v)
+        print(str(k)+" "+str(v))
     #DGs = []
     #for p1, p2 in zip(w_c.values()[0], w_c.values()[1]):
     #    DGs.append(DG(p1, p2))
@@ -239,15 +239,16 @@ if __name__ == '__main__':
     #train_doc_words1 = get_words(train_urls, './wx_result.dat', id_col=-1, content_col=1, seperator='\0')
     ## 用标题
     #train_doc_words1 = get_words(train_urls, '../data/xinjiang_profile_wx_balance.dat', id_col=3, content_col=8, seperator='\t')
-    #train_doc_words1 = get_words(train_urls, '../data/xj_gender_product_balance.dat', id_col=8, content_col=7, seperator='\t')
-    train_doc_words1 = get_words(train_urls, '../data/xj_phone_gender_product_balance.dat', id_col=7, content_col=6, seperator='\t')
-    features1 = select_feature_by_ig(train_doc_words1, trainY, featureN=5000)
+    train_doc_words1 = get_words(train_urls, '../data/xj_gender_product_balance.dat', id_col=8, content_col=7, seperator='\t')
+    #train_doc_words1 = get_words(train_urls, '../data/xj_phone_gender_product_balance.dat', id_col=7, content_col=6, seperator='\t')
+    features1 = select_feature_by_ig(train_doc_words1, trainY, featureN=18000)
     trainX1 = generateX(features1, train_doc_words1)
 
     #### category features
     #train_doc_words2 = get_words(train_urls, '../data/xinjiang_profile_wx_balance.dat', id_col=3, content_col=7, seperator='\t')
-    train_doc_words2 = get_words(train_urls, '../data/xj_phone_gender_product_balance.dat', id_col=7, content_col=5, seperator='\t')
-    features2 = select_feature_by_ig(train_doc_words2, trainY, featureN=3000)
+    #train_doc_words2 = get_words(train_urls, '../data/xj_phone_gender_product_balance.dat', id_col=7, content_col=5, seperator='\t')
+    train_doc_words2 = get_words(train_urls, '../data/xj_gender_product_balance.dat', id_col=8, content_col=6, seperator='\t')
+    features2 = select_feature_by_ig(train_doc_words2, trainY, featureN=4000)
     trainX2 = generateX(features2, train_doc_words2)
 
     trainX = np.concatenate((trainX1,trainX2),axis=1)
@@ -256,12 +257,13 @@ if __name__ == '__main__':
     #train(trainX, trainY)
 
     #all_doc_words1 = get_words(urls, './wx_result.dat', id_col=-1, content_col=1, seperator='\0')
-    #all_doc_words1 = get_words(urls, '../data/xj_gender_product_balance.dat', id_col=8, content_col=7, seperator='\t')
-    all_doc_words1 = get_words(urls, '../data/xj_phone_gender_product_balance.dat', id_col=7, content_col=6, seperator='\t')
+    all_doc_words1 = get_words(urls, '../data/xj_gender_product_balance.dat', id_col=8, content_col=7, seperator='\t')
+    #all_doc_words1 = get_words(urls, '../data/xj_phone_gender_product_balance.dat', id_col=7, content_col=6, seperator='\t')
     allX1 = generateX(features1, all_doc_words1)
     #allX = allX1
     #all_doc_words2 = get_words(urls, '../data/xinjiang_profile_wx_balance.dat', id_col=3, content_col=7, seperator='\t')
-    all_doc_words2 = get_words(urls, '../data/xj_phone_gender_product_balance.dat', id_col=7, content_col=5, seperator='\t')
+    #all_doc_words2 = get_words(urls, '../data/xj_phone_gender_product_balance.dat', id_col=7, content_col=5, seperator='\t')
+    all_doc_words2 = get_words(urls, '../data/xj_gender_product_balance.dat', id_col=8, content_col=6, seperator='\t')
     allX2 = generateX(features2, all_doc_words2)
     allX = np.concatenate((allX1,allX2),axis=1)
     #testX, test_keywords = content_feature(urls, '/Users/Miyayx/Documents/workspace/pageparser-weixin/wx_result.dat')
